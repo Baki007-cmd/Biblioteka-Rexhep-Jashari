@@ -1,0 +1,1 @@
+Dy PDF-te e rinj jane ne private-pdfs/. Mos e publikoni kete dosje ne GitHub ose Vercel. Nxirrini privatisht para publikimit te skedareve te faqes. Per ngarkim ne Supabase, vendosni variablat e mjedisit dhe ekzekutoni: python scripts/upload_private_pages.py private-pdfs
