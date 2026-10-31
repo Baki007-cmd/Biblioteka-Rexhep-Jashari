@@ -11,7 +11,7 @@ module.exports = async (req,res) => {
   if (!base || !key) return res.status(503).send('Ruajtja private nuk është konfiguruar ende');
   try {
     const object = `${book}/${String(page).padStart(4,'0')}.webp`;
-    const url = `${base.replace(/\\/$/,'')}/storage/v1/object/authenticated/${encodeURIComponent(bucket)}/${object}`;
+   const url = `${base.replace(/\/$/, '')}/storage/v1/object/authenticated/${encodeURIComponent(bucket)}/${object}`;
     const response = await fetch(url, {headers:{Authorization:`Bearer ${key}`,apikey:key},signal:AbortSignal.timeout(15000)});
     if (!response.ok) return res.status(response.status===404?404:502).send('Faqja nuk është e disponueshme');
     res.setHeader('Content-Type','image/webp');
