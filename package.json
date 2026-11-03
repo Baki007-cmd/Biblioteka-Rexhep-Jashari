@@ -2,7 +2,6 @@
   "name": "biblioteka-rexhep-jashari",
   "version": "1.0.0",
   "description": "Biblioteka personale e Rexhep Rushit Jasharit",
-  "type": "module",
   "scripts": {
     "build": "echo 'No build step required for static site'"
   },
