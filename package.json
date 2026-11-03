@@ -1,0 +1,18 @@
+{
+  "name": "biblioteka-rexhep-jashari",
+  "version": "1.0.0",
+  "description": "Biblioteka personale e Rexhep Rushit Jasharit",
+  "type": "module",
+  "scripts": {
+    "build": "echo 'No build step required for static site'"
+  },
+  "keywords": [
+    "biblioteca",
+    "rexhep-jashari"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@vercel/analytics": "^1.1.1"
+  }
+}
