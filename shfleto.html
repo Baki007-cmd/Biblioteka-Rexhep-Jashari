@@ -23,6 +23,7 @@ header{padding:7px 14px;min-height:48px}header h1{font-size:clamp(15px,2vw,19px)
 }
 @media(min-width:701px) and (max-width:900px){.toolbar{gap:4px}.toolbar #bookSelect{flex-basis:145px;min-width:100px}.toolbar button,.toolbar select,.toolbar input{font-size:12px;padding:5px 4px}.toolbar #counter{font-size:12px}.toolbar #jump{flex-basis:48px;width:48px}}
 @media(max-width:700px){.book{max-width:580px}.sheet img{object-fit:contain}}
+.book .sheet{cursor:pointer}
 </style></head><body>
 <header><h1>📖 Shfletimi i librave</h1><a href="/">← Kthehu në bibliotekë</a></header>
 <main>
@@ -37,6 +38,15 @@ function imageUrl(n){return '/api/page?book='+encodeURIComponent(sel.value)+'&pa
 function show(){const one=single(),leftN=one?0:(page%2===0?page:page-1),rightN=one?page:leftN+1;left.style.visibility=leftN>0&&leftN<=total?'visible':'hidden';right.style.visibility=rightN<=total?'visible':'hidden';if(leftN>0&&leftN<=total)left.src=imageUrl(leftN);if(rightN<=total)right.src=imageUrl(rightN);counter.textContent=one?'Faqja '+page+' / '+total:'Faqet '+(leftN||'–')+'–'+(rightN<=total?rightN:'–')+' / '+total;jump.value=page;try{localStorage.setItem('biblioteka:lastpage:'+sel.value,String(page))}catch(e){}document.getElementById('prev').disabled=page<=1;document.getElementById('next').disabled=page>=total;history.replaceState(null,'','?book='+encodeURIComponent(sel.value)+'&page='+page)}
 async function load(){status.textContent='Duke hapur librin…';try{const r=await fetch('/api/book-info?book='+encodeURIComponent(sel.value));if(!r.ok)throw Error('Nuk u gjet libri');total=(await r.json()).pages;page=Math.max(1,Math.min(total,Number(new URLSearchParams(location.search).get('page'))||Number(localStorage.getItem('biblioteka:lastpage:'+sel.value))||1));show();status.textContent=''}catch(e){status.textContent='Nuk u arrit të hapet libri. Provo përsëri.'}}
 function move(dir){if(busy||!total)return;const step=single()?1:2;const target=Math.max(1,Math.min(total,page+dir*step));if(target===page)return;busy=true;const reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;if(!single()&&!reduce&&dir>0){document.getElementById('turnImg').src=right.src;book.classList.add('flipping')}else book.classList.add('flipping');setTimeout(()=>{page=target;book.classList.remove('flipping');show();busy=false},reduce?0:single()?300:550)}
+// Clicking the visible left/right page turns it on laptops and desktops.
+let lastTouchAt=0;
+book.addEventListener('touchend',()=>{lastTouchAt=Date.now()},{passive:true});
+book.addEventListener('click',e=>{
+ if(Date.now()-lastTouchAt<700||busy)return;
+ const bounds=book.getBoundingClientRect();
+ const x=e.clientX-bounds.left;
+ move(single()?(x<bounds.width*0.3?-1:1):(x<bounds.width/2?-1:1));
+});
 document.getElementById('prev').onclick=()=>move(-1);document.getElementById('next').onclick=()=>move(1);document.getElementById('go').onclick=()=>{if(!total)return;page=Math.max(1,Math.min(total,Math.trunc(Number(jump.value)||1)));show()};sel.onchange=()=>{history.replaceState(null,'','?book='+encodeURIComponent(sel.value));page=1;load()};window.addEventListener('resize',()=>{if(total)show()});document.addEventListener('keydown',e=>{if(e.target.matches('input,select'))return;if(e.key==='ArrowRight')move(1);if(e.key==='ArrowLeft')move(-1)});// Swipe navigation: horizontal gestures only; vertical scrolling stays available.
 let touchStartX=0,touchStartY=0,touchStarted=false;
 const stage=document.querySelector('.stage');
