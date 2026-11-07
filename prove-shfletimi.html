@@ -7,6 +7,22 @@
 header{padding:7px 14px;min-height:48px}header h1{font-size:clamp(15px,2vw,19px)}header a{font-size:13px;white-space:nowrap}main{padding:6px 10px}main>.hint:first-child{display:none}.toolbar{margin:4px auto 8px;gap:6px}.toolbar button,.toolbar select,.toolbar input{min-height:36px;padding:5px 9px;font-size:14px}.toolbar label{font-size:13px}.toolbar #bookSelect{max-width:min(42vw,300px)}.toolbar #counter{font-size:13px;white-space:nowrap}.stage{padding:2px 2px 8px;min-height:unset}.book{height:min(80dvh,850px)}
 @media(max-width:700px){header{padding:7px 9px;gap:8px}header h1{font-size:15px}header a{font-size:12px}main{padding:5px}.toolbar{display:grid;grid-template-columns:minmax(0,1fr) auto auto auto;gap:5px;margin:3px auto 7px}.toolbar label[for="bookSelect"]{display:none}.toolbar #bookSelect{grid-column:1 / -1;max-width:none;width:100%}.toolbar #prev{grid-column:1}.toolbar #counter{grid-column:2 / 4;text-align:center;font-size:12px}.toolbar #next{grid-column:4}.toolbar label[for="jump"]{display:none}.toolbar #jump{grid-column:2;width:55px;justify-self:end}.toolbar #go{grid-column:3}.toolbar button,.toolbar select,.toolbar input{font-size:12px;min-height:34px;padding:4px 6px}.stage{min-height:unset}.book{height:calc(100dvh - 210px);min-height:360px}}
 @media(min-width:701px) and (max-width:1100px){.book{height:min(76dvh,850px)}}
+
+/* One-line desktop toolbar and larger, readable book pages. */
+@media(min-width:701px){
+ .toolbar{display:flex;flex-wrap:nowrap;justify-content:center;gap:6px;width:100%;margin:4px auto 7px}
+ .toolbar label[for="bookSelect"],.toolbar label[for="jump"]{display:none}
+ .toolbar #bookSelect{flex:0 1 220px;min-width:125px;max-width:220px}
+ .toolbar #counter{flex:0 0 auto;white-space:nowrap;font-size:13px}
+ .toolbar #prev,.toolbar #next{flex:0 0 auto}
+ .toolbar #jump{flex:0 0 64px;width:64px}
+ .toolbar #go{flex:0 0 auto}
+ .toolbar button,.toolbar select,.toolbar input{min-height:36px;padding:5px 7px;font-size:13px}
+ .book{width:min(100%,1420px);height:min(82dvh,1000px)}
+ .sheet img{object-fit:fill}
+}
+@media(min-width:701px) and (max-width:900px){.toolbar{gap:4px}.toolbar #bookSelect{flex-basis:145px;min-width:100px}.toolbar button,.toolbar select,.toolbar input{font-size:12px;padding:5px 4px}.toolbar #counter{font-size:12px}.toolbar #jump{flex-basis:48px;width:48px}}
+@media(max-width:700px){.book{max-width:580px}.sheet img{object-fit:contain}}
 </style></head><body>
 <header><h1>📖 Provë: Shfletimi i librave</h1><a href="/">← Kthehu në bibliotekë</a></header>
 <main><p class="hint">Ky është vetëm një version provë. Biblioteka origjinale nuk është ndryshuar.</p>
