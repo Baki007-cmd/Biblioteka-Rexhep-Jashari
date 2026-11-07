@@ -41,6 +41,8 @@ header{padding:7px 14px;min-height:48px}header h1{font-size:clamp(15px,2vw,19px)
  .book .sheet:nth-child(2) img{width:100%;height:100%;object-fit:contain}
  .book .spine,.book .turn{display:none!important}
 }
+
+.stage,.book,.sheet,.sheet img{touch-action:pan-y;overscroll-behavior-x:contain;-webkit-user-select:none;user-select:none;-webkit-user-drag:none}
 </style></head><body>
 <header><h1>📖 Shfletimi i librave</h1><a href="/">← Kthehu në bibliotekë</a></header>
 <main>
@@ -64,19 +66,27 @@ book.addEventListener('click',e=>{
  const x=e.clientX-bounds.left;
  move(single()?(x<bounds.width*0.3?-1:1):(x<bounds.width/2?-1:1));
 });
-document.getElementById('prev').onclick=()=>move(-1);document.getElementById('next').onclick=()=>move(1);document.getElementById('go').onclick=()=>{if(!total)return;page=Math.max(1,Math.min(total,Math.trunc(Number(jump.value)||1)));show()};sel.onchange=()=>{history.replaceState(null,'','?book='+encodeURIComponent(sel.value));page=1;load()};window.addEventListener('resize',()=>{if(total)show()});document.addEventListener('keydown',e=>{if(e.target.matches('input,select'))return;if(e.key==='ArrowRight')move(1);if(e.key==='ArrowLeft')move(-1)});// Swipe navigation: horizontal gestures only; vertical scrolling stays available.
-let touchStartX=0,touchStartY=0,touchStarted=false;
+document.getElementById('prev').onclick=()=>move(-1);document.getElementById('next').onclick=()=>move(1);document.getElementById('go').onclick=()=>{if(!total)return;page=Math.max(1,Math.min(total,Math.trunc(Number(jump.value)||1)));show()};sel.onchange=()=>{history.replaceState(null,'','?book='+encodeURIComponent(sel.value));page=1;load()};window.addEventListener('resize',()=>{if(total)show()});document.addEventListener('keydown',e=>{if(e.target.matches('input,select'))return;if(e.key==='ArrowRight')move(1);if(e.key==='ArrowLeft')move(-1)});// Reliable horizontal swipe on iPhone Safari; preserve vertical scrolling.
+let touchStartX=0,touchStartY=0,touchLastX=0,touchLastY=0,touchStarted=false;
 const stage=document.querySelector('.stage');
 stage.addEventListener('touchstart',e=>{
  if(e.touches.length!==1){touchStarted=false;return}
- touchStartX=e.touches[0].clientX;touchStartY=e.touches[0].clientY;touchStarted=true;
+ touchStartX=touchLastX=e.touches[0].clientX;
+ touchStartY=touchLastY=e.touches[0].clientY;
+ touchStarted=true;
 },{passive:true});
+stage.addEventListener('touchmove',e=>{
+ if(!touchStarted||e.touches.length!==1)return;
+ touchLastX=e.touches[0].clientX;touchLastY=e.touches[0].clientY;
+ const dx=touchLastX-touchStartX,dy=touchLastY-touchStartY;
+ if(Math.abs(dx)>12&&Math.abs(dx)>Math.abs(dy)*1.15&&e.cancelable)e.preventDefault();
+},{passive:false});
 stage.addEventListener('touchend',e=>{
- if(!touchStarted||e.changedTouches.length!==1)return;
+ if(!touchStarted)return;
  touchStarted=false;
- const dx=e.changedTouches[0].clientX-touchStartX;
- const dy=e.changedTouches[0].clientY-touchStartY;
- if(Math.abs(dx)>=45&&Math.abs(dx)>Math.abs(dy)*1.3)move(dx<0?1:-1);
+ if(e.changedTouches.length===1){touchLastX=e.changedTouches[0].clientX;touchLastY=e.changedTouches[0].clientY}
+ const dx=touchLastX-touchStartX,dy=touchLastY-touchStartY;
+ if(Math.abs(dx)>=30&&Math.abs(dx)>Math.abs(dy)*1.15)move(dx<0?1:-1);
 },{passive:true});
 stage.addEventListener('touchcancel',()=>{touchStarted=false},{passive:true});
 right.onerror=()=>status.textContent='Faqja nuk u ngarkua. Provo ta rifreskosh.';load();
