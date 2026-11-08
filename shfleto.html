@@ -55,6 +55,20 @@ header{padding:7px 14px;min-height:48px}header h1{font-size:clamp(15px,2vw,19px)
 }
 
 @media(max-width:700px){.book,.book .sheet,.book .sheet img{touch-action:none!important;-webkit-touch-callout:none}}
+
+/* Paper-turn animation for single-page iPhone view. */
+@media(max-width:700px){
+ .book{perspective:1400px;transform-style:preserve-3d}
+ .mobile-page-turn{position:absolute;inset:0;z-index:10;overflow:hidden;pointer-events:none;transform-style:preserve-3d;backface-visibility:hidden;opacity:1;background:#eee7d9;box-shadow:0 3px 12px #0004}
+ .mobile-page-turn img{display:block;width:100%;height:100%;object-fit:contain;backface-visibility:hidden}
+ .mobile-page-turn.forward{transform-origin:left center;transform:rotateY(0)}
+ .mobile-page-turn.backward{transform-origin:right center;transform:rotateY(0)}
+ .mobile-page-turn.forward.active{animation:paperForward .5s ease-in forwards}
+ .mobile-page-turn.backward.active{animation:paperBackward .5s ease-in forwards}
+ @keyframes paperForward{0%{transform:rotateY(0);filter:brightness(1)}55%{filter:brightness(.72)}100%{transform:rotateY(-100deg);opacity:0}}
+ @keyframes paperBackward{0%{transform:rotateY(0);filter:brightness(1)}55%{filter:brightness(.72)}100%{transform:rotateY(100deg);opacity:0}}
+}
+@media(prefers-reduced-motion:reduce){.mobile-page-turn{animation:none!important}}
 </style></head><body>
 <header><h1>📖 Shfletimi i librave</h1><a href="/">← Kthehu në bibliotekë</a></header>
 <main>
@@ -68,7 +82,31 @@ const single=()=>matchMedia('(max-width:700px)').matches;
 function imageUrl(n){return '/api/page?book='+encodeURIComponent(sel.value)+'&page='+n}
 function show(){const one=single(),leftN=one?0:(page%2===0?page:page-1),rightN=one?page:leftN+1;left.style.visibility=leftN>0&&leftN<=total?'visible':'hidden';right.style.visibility=rightN<=total?'visible':'hidden';if(leftN>0&&leftN<=total)left.src=imageUrl(leftN);if(rightN<=total)right.src=imageUrl(rightN);counter.textContent=one?'Faqja '+page+' / '+total:'Faqet '+(leftN||'–')+'–'+(rightN<=total?rightN:'–')+' / '+total;jump.value=page;try{localStorage.setItem('biblioteka:lastpage:'+sel.value,String(page))}catch(e){}document.getElementById('prev').disabled=page<=1;document.getElementById('next').disabled=page>=total;history.replaceState(null,'','?book='+encodeURIComponent(sel.value)+'&page='+page)}
 async function load(){status.textContent='Duke hapur librin…';try{const r=await fetch('/api/book-info?book='+encodeURIComponent(sel.value));if(!r.ok)throw Error('Nuk u gjet libri');total=(await r.json()).pages;page=Math.max(1,Math.min(total,Number(new URLSearchParams(location.search).get('page'))||Number(localStorage.getItem('biblioteka:lastpage:'+sel.value))||1));show();status.textContent=''}catch(e){status.textContent='Nuk u arrit të hapet libri. Provo përsëri.'}}
-function move(dir){if(busy||!total)return;const step=single()?1:2;const target=Math.max(1,Math.min(total,page+dir*step));if(target===page)return;busy=true;const reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;if(!single()&&!reduce&&dir>0){document.getElementById('turnImg').src=right.src;book.classList.add('flipping')}else book.classList.add('flipping');setTimeout(()=>{page=target;book.classList.remove('flipping');show();busy=false},reduce?0:single()?300:550)}
+function move(dir){
+ if(busy||!total)return;
+ const step=single()?1:2;
+ const target=Math.max(1,Math.min(total,page+dir*step));
+ if(target===page)return;
+ busy=true;
+ const reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
+ if(single()&&!reduce){
+  // Animate a snapshot of the current page like a turning paper sheet.
+  const turning=document.createElement('div');
+  turning.className='mobile-page-turn '+(dir>0?'forward':'backward');
+  const snapshot=document.createElement('img');
+  snapshot.src=right.src;snapshot.alt='';
+  turning.appendChild(snapshot);book.appendChild(turning);
+  requestAnimationFrame(()=>turning.classList.add('active'));
+  setTimeout(()=>{page=target;show()},210);
+  setTimeout(()=>{turning.remove();busy=false},520);
+ }else{
+  if(!single()&&!reduce&&dir>0){
+   document.getElementById('turnImg').src=right.src;
+  }
+  if(!reduce)book.classList.add('flipping');
+  setTimeout(()=>{page=target;book.classList.remove('flipping');show();busy=false},reduce?0:550);
+ }
+}
 // Clicking the visible left/right page turns it on laptops and desktops.
 let lastTouchAt=0;
 book.addEventListener('touchend',()=>{lastTouchAt=Date.now()},{passive:true});
